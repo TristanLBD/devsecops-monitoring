@@ -1,0 +1,74 @@
+name: Security Pipeline
+
+on:
+    push:
+        branches: ["main"]
+
+jobs:
+    scan:
+        runs-on: ubuntu-latest
+
+        steps:
+            # ========================
+            # CHECKOUT CODE
+            # ========================
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            # ========================
+            # INSTALL TRIVY
+            # ========================
+            - name: Install Trivy
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y wget
+                  wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.0_Linux-64bit.deb
+                  sudo dpkg -i trivy_0.50.0_Linux-64bit.deb
+
+            # ========================
+            # FILESYSTEM SCAN
+            # ========================
+            - name: Trivy filesystem scan
+              run: trivy fs . -f json -o trivy-report.json
+
+            # ========================
+            # PYTHON SCRIPT (rapport)
+            # ========================
+            - name: Setup Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+
+            - name: Run Python analyzer
+              run: python3 scripts/analyze_trivy.py
+
+            # ========================
+            # BANDIT (OPTIONNEL)
+            # ========================
+            - name: Install Bandit
+              run: pip install bandit
+
+            - name: Run Bandit scan
+              run: bandit -r scripts/
+
+            # ========================
+            # SARIF (GITHUB SECURITY TAB)
+            # ========================
+            - name: Trivy SARIF scan
+              run: trivy fs . -f sarif -o trivy.sarif
+
+            - name: Upload SARIF to GitHub Security
+              uses: github/codeql-action/upload-sarif@v3
+              with:
+                  sarif_file: trivy.sarif
+
+            # ========================
+            # UPLOAD REPORTS
+            # ========================
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: security-reports
+                  path: |
+                      trivy-report.json
+                      trivy.sarif

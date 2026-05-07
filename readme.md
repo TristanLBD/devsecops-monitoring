@@ -263,3 +263,67 @@ bandit -r scripts/
 ```bash
 bandit -r scripts/ -f json -o bandit-report.json
 ```
+
+# CI GitHub Actions
+
+## Cette pipeline va :
+
+- vérifier automatiquement la sécurité du code à chaque push sur main
+- détecter des vulnérabilités avec Trivy
+- Analyser et résumer le rapport avec le script python
+- sauvegarder le résultat pour consultation
+- (Dans l'onglet action du repo, il doit y avoir la pipeline, le scan et le fichier généré)
+
+```bash
+mkdir -p .github/workflows
+nano .github/workflows/security.yml
+```
+
+```bash
+name: Security Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+
+  scan:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ---------------- TRIVY ----------------
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.0_Linux-64bit.deb
+          sudo dpkg -i trivy_0.50.0_Linux-64bit.deb
+
+      - name: Scan filesystem
+        run: trivy fs . > trivy-report.txt
+
+      # ---------------- PYTHON SCRIPT ----------------
+      - name: Run Python analyzer
+        run: |
+          sudo apt-get install -y python3
+          python3 scripts/analyze_trivy.py
+
+      # ---------------- UPLOAD REPORT ----------------
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: trivy-report.txt
+```
+
+```bash
+git add .
+git commit -m "Add GitHub Actions security pipeline"
+git push
+```
