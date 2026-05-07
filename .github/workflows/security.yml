@@ -26,14 +26,15 @@ jobs:
                   curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
 
             # ========================
-            # FILESYSTEM SCAN
+            # FILESYSTEM SCAN (JSON)
             # ========================
             - name: Trivy filesystem scan (JSON)
-              run: trivy fs . \
-                  -f json \
-                  -o trivy-report.json \
-                  --exit-code 0 \
-                  --severity HIGH,CRITICAL
+              run: |
+                  trivy fs . \
+                    -f json \
+                    -o trivy-report.json \
+                    --exit-code 0 \
+                    --severity HIGH,CRITICAL
 
             # ========================
             # PYTHON SCRIPT
@@ -56,14 +57,15 @@ jobs:
               run: bandit -r scripts/
 
             # ========================
-            # SARIF SCAN
+            # SARIF SCAN (GITHUB SECURITY)
             # ========================
             - name: Trivy SARIF scan
-              run: trivy fs . \
-                  -f sarif \
-                  -o trivy.sarif \
-                  --exit-code 0 \
-                  --severity HIGH,CRITICAL
+              run: |
+                  trivy fs . \
+                    -f sarif \
+                    -o trivy.sarif \
+                    --exit-code 0 \
+                    --severity HIGH,CRITICAL
 
             - name: Upload SARIF to GitHub Security
               uses: github/codeql-action/upload-sarif@v3
