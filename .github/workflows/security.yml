@@ -29,7 +29,7 @@ jobs:
             # FILESYSTEM SCAN
             # ========================
             - name: Trivy filesystem scan
-              run: trivy fs . -f json -o trivy-report.json
+              run: trivy fs . -f json -o trivy-report.json --exit-code 0
 
             # ========================
             # PYTHON SCRIPT (rapport)
@@ -55,7 +55,7 @@ jobs:
             # SARIF (GITHUB SECURITY TAB)
             # ========================
             - name: Trivy SARIF scan
-              run: trivy fs . -f sarif -o trivy.sarif
+              run: trivy fs . -f sarif -o trivy.sarif --exit-code 0
 
             - name: Upload SARIF to GitHub Security
               uses: github/codeql-action/upload-sarif@v3
