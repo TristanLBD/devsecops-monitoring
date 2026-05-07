@@ -243,3 +243,23 @@ print(f"High: {high}")
 ```bash
 python3 scripts/analyze_trivy.py
 ```
+
+# Scan Python (Bandit)
+
+## Installer bandit
+
+```bash
+pip install bandit
+```
+
+## Scan
+
+```bash
+bandit -r scripts/
+```
+
+## Rapport
+
+```bash
+bandit -r scripts/ -f json -o bandit-report.json
+```
