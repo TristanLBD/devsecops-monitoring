@@ -12,7 +12,7 @@ sudo systemctl start docker
 sudo systemctl enable docker
 ```
 
-## Ajouter ton user :
+## Ajouter le user :
 
 ```bash
 sudo usermod -aG docker $USER
@@ -161,7 +161,7 @@ docker ps
 - Grafana : http://localhost:3000/
 - Prometheus : http://localhost:9090/
 
-# Ce que fait ta stack
+# Ce que fait la stack
 
 - Monitoring :
     - Prometheus collecte les métriques
