@@ -170,3 +170,76 @@ docker ps
 - App :
     - WordPress site web
     - MySQL base de données
+
+# Installer trivy
+
+```bash
+sudo apt install trivy -y
+```
+
+# Scan du projet
+
+```bash
+trivy fs .
+```
+
+# Scan image WordPress
+
+```bash
+trivy image wordpress:latest
+```
+
+# Générer un rapport
+
+```bash
+trivy image -f json -o trivy-report.json wordpress:latest
+```
+
+## Puis l'ajouter au repo
+
+```bash
+git add trivy-report.json
+git commit -m "Add Trivy vulnerability report"
+git push
+```
+
+# Script Python (recap des failles)
+
+```bash
+mkdir scripts
+nano scripts/analyze_trivy.py
+```
+
+## Code du ficheir python :
+
+```python
+import json
+
+file = "trivy-report.json"
+
+with open(file) as f:
+    data = json.load(f)
+
+total = 0
+critical = 0
+high = 0
+
+for result in data.get("Results", []):
+    for v in result.get("Vulnerabilities", []):
+        total += 1
+        if v.get("Severity") == "CRITICAL":
+            critical += 1
+        if v.get("Severity") == "HIGH":
+            high += 1
+
+print("=== TRIVY REPORT ===")
+print(f"Total vulnerabilities: {total}")
+print(f"Critical: {critical}")
+print(f"High: {high}")
+```
+
+## Lancer le code python
+
+```bash
+python3 scripts/analyze_trivy.py
+```
