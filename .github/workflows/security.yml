@@ -28,11 +28,15 @@ jobs:
             # ========================
             # FILESYSTEM SCAN
             # ========================
-            - name: Trivy filesystem scan
-              run: trivy fs . -f json -o trivy-report.json --exit-code 0
+            - name: Trivy filesystem scan (JSON)
+              run: trivy fs . \
+                  -f json \
+                  -o trivy-report.json \
+                  --exit-code 0 \
+                  --severity HIGH,CRITICAL
 
             # ========================
-            # PYTHON SCRIPT (rapport)
+            # PYTHON SCRIPT
             # ========================
             - name: Setup Python
               uses: actions/setup-python@v5
@@ -43,7 +47,7 @@ jobs:
               run: python3 scripts/analyze_trivy.py
 
             # ========================
-            # BANDIT (OPTIONNEL)
+            # BANDIT
             # ========================
             - name: Install Bandit
               run: pip install bandit
@@ -52,10 +56,14 @@ jobs:
               run: bandit -r scripts/
 
             # ========================
-            # SARIF (GITHUB SECURITY TAB)
+            # SARIF SCAN
             # ========================
             - name: Trivy SARIF scan
-              run: trivy fs . -f sarif -o trivy.sarif --exit-code 0
+              run: trivy fs . \
+                  -f sarif \
+                  -o trivy.sarif \
+                  --exit-code 0 \
+                  --severity HIGH,CRITICAL
 
             - name: Upload SARIF to GitHub Security
               uses: github/codeql-action/upload-sarif@v3
@@ -63,9 +71,9 @@ jobs:
                   sarif_file: trivy.sarif
 
             # ========================
-            # UPLOAD REPORTS
+            # UPLOAD ARTIFACTS
             # ========================
-            - name: Upload artifacts
+            - name: Upload reports
               uses: actions/upload-artifact@v4
               with:
                   name: security-reports
